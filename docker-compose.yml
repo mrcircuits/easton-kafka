@@ -1,0 +1,68 @@
+version: '2'
+services:
+  httpd:
+    image: mrcircuits/easton-kafka-http
+    ports:
+      - 8081:8082
+    depends_on:
+      - kafka1
+    environment:
+      HTTP_LISTENER_PORT: 8082
+      KAFKA_SERVERS: kafka1:9091,kafka2:9092,kafka3:9093
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - 2181:2181
+    volumes:
+      - ./logs/ZK/data:/data
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+  kafka1:
+    image: wurstmeister/kafka
+    ports:
+      - 9091:9092
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.3.29
+      KAFKA_ADVERTISED_PORT: 9091
+      KAFKA_CREATE_TOPICS: "droneVideo:2:1,droneState:2:1,test:1:2,1-video:2:2"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+    volumes:
+      - ./logs/kafka1:/kafka
+      - /var/run/docker.sock:/var/run/docker.sock
+  kafka2:
+    image: wurstmeister/kafka
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.3.29
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+    volumes:
+      - ./logs/kafka2:/kafka
+      - /var/run/docker.sock:/var/run/docker.sock
+  kafka3:
+    image: wurstmeister/kafka
+    ports:
+      - 9093:9092
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.3.29
+      KAFKA_ADVERTISED_PORT: 9093
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+    volumes:
+      - ./logs/kafka3:/kafka
+      - /var/run/docker.sock:/var/run/docker.sock
